@@ -1,0 +1,6 @@
+target/
+.DS_Store
+*.iml
+.idea/
+# fast-md5 (Timothy W. Macinta, LGPL) - the 2009 build linked it; not redistributed here.
+lib/
