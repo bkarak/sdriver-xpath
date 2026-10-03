@@ -144,4 +144,14 @@ class SecureXPathTest {
         factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
         assertTrue(factory.getFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING));
     }
+
+    @Test
+    void refusalMessageCannotStartANewLine() {
+        XPath xpath = factory.newXPath();
+        XPathExpressionException e = assertThrows(XPathExpressionException.class,
+                () -> xpath.compile("//a[@x='v\r\nforged']"));
+        assertFalse(e.getMessage().contains("\n"), e.getMessage());
+        assertFalse(e.getMessage().contains("\r"), e.getMessage());
+        assertTrue(e.getMessage().contains("v\\r\\nforged"), e.getMessage());
+    }
 }

@@ -71,7 +71,7 @@ logger (`System.Logger`, so it ends up wherever your logging is routed).
 JDK 17 or later, Maven:
 
 ```bash
-mvn            # compiles, runs the 20 tests, writes target/sdriver-xpath-2.0.0.jar
+mvn            # compiles, runs the 24 tests, writes target/sdriver-xpath-2.0.1.jar
 ```
 
 There are no runtime dependencies.
@@ -91,12 +91,20 @@ java -cp target/classes:target/test-classes org.sdriver.xpath.Benchmark
 | --- | ---: | ---: | ---: |
 | 2009, the paper: Core 2 Duo 2.4 GHz, Mac OS X 10.5, Java 1.6 | 21,311 ms | 48,761 ms | 128% |
 | 2026, the 2009 code: Apple M4 Max, OpenJDK 26 | ≈1,580 ms | ≈4,400 ms | ≈178% |
-| 2026, this code: Apple M4 Max, OpenJDK 26 | ≈1,580 ms | ≈3,540 ms | 121–129% |
+| 2026, 2.0.0: Apple M4 Max, OpenJDK 26 | ≈1,580 ms | ≈3,540 ms | 121–129% |
+| 2026, 2.0.1: Apple M4 Max, OpenJDK 26 | ≈1,570 ms | ≈3,440 ms | 117–120% |
 
 The 2026 rows come from three runs each, run in turn on the same machine. The 2009 code was
 built from the first commit with `javac --release 8`, against the original fast-md5 jar, and
-measured with the same harness. What's left of the overhead is mostly walking the stack, at
-about two microseconds a call.
+measured with the same harness. The 2.0.1 fixes are not on the path the benchmark measures, so
+the gap between its two rows is run-to-run variation between sessions, not a speed-up. What's
+left of the overhead is mostly walking the stack, at about two microseconds a call.
+
+## Changes
+
+Every release is in [CHANGELOG.md](CHANGELOG.md). 2.0.1 fixes three bugs found in 2.0.0: a
+negative number in a trained value slot was refused, a refused query could forge log lines,
+and the flat-file registry could lose an identifier when a write failed.
 
 ## What changed from 2009
 

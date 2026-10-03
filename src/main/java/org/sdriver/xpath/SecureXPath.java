@@ -65,9 +65,33 @@ public class SecureXPath implements XPath {
         if (trainingMode) {
             registry.addID(id);
         } else if (!registry.exists(id)) {
-            LOG.log(Level.WARNING, "Refused unknown XPath query {0} (identifier {1})", expression, id);
-            throw new XPathExpressionException("Invalid Expression - " + expression + " - (Security Risk)");
+            // The query carries untrusted input; escaped, it cannot start a line of its own
+            // in the log or in whatever displays the exception.
+            String shown = escape(expression);
+            LOG.log(Level.WARNING, "Refused unknown XPath query {0} (identifier {1})", shown, id);
+            throw new XPathExpressionException("Invalid Expression - " + shown + " - (Security Risk)");
         }
+    }
+
+    static String escape(String s) {
+        StringBuilder out = new StringBuilder(s.length());
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\\') {
+                out.append("\\\\");
+            } else if (c == '\n') {
+                out.append("\\n");
+            } else if (c == '\r') {
+                out.append("\\r");
+            } else if (c == '\t') {
+                out.append("\\t");
+            } else if (Character.isISOControl(c) || c == ' ' || c == ' ') {
+                out.append(String.format("\\u%04x", (int) c));
+            } else {
+                out.append(c);
+            }
+        }
+        return out.toString();
     }
 
     @Override

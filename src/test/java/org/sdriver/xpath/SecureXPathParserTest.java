@@ -61,4 +61,19 @@ class SecureXPathParserTest {
     void keepsAnUnterminatedLiteralVerbatim() {
         assertEquals("// a [ @ x = 'v ]", strip("//a[@x='v ]"));
     }
+
+    @Test
+    void foldsANegativeSignIntoTheNumber() {
+        // A negative value is still a value; 2.0.0 kept the '-' and refused it.
+        assertEquals(strip("//a[@x=5]"), strip("//a[@x=-5]"));
+        assertEquals(strip("//a[f(1, 2)]"), strip("//a[f(-1, -.5)]"));
+        assertEquals(strip("//a[@x=1 and @y>2]"), strip("//a[@x=1 and @y>-2]"));
+    }
+
+    @Test
+    void keepsABinaryMinus() {
+        assertEquals("// a [ @ x - ? ]", strip("//a[@x - 5]"));
+        assertEquals("// a [ ? - ? ]", strip("//a[3 - -5]"));
+        assertNotEquals(strip("//a[@x=5]"), strip("//a[@x=@y - 5]"));
+    }
 }

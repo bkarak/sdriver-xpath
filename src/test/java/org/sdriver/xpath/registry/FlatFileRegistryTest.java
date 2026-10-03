@@ -3,10 +3,13 @@ package org.sdriver.xpath.registry;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -36,5 +39,19 @@ class FlatFileRegistryTest {
         assertTrue(second.exists("b"));
         assertFalse(second.exists("c"));
         assertArrayEquals(new String[] {"a", "b"}, second.getIDs());
+    }
+
+    @Test
+    void anIdentifierThatCannotBeWrittenIsNotRecorded() throws Exception {
+        Path file = dir.resolve("ids.registry");
+        Files.writeString(file, "a\n");
+        Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("r--r--r--"));
+        FlatFileRegistry broken = new FlatFileRegistry(file);
+        assertTrue(broken.exists("a"));
+
+        assertThrows(UncheckedIOException.class, () -> broken.addID("b"));
+        // 2.0.0 had it in memory by now, so it passed this run and a retry never wrote it.
+        assertFalse(broken.exists("b"));
+        assertThrows(UncheckedIOException.class, () -> broken.addID("b"));
     }
 }

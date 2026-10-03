@@ -103,6 +103,10 @@ public final class SecureXPathParser {
                     i++;
                 }
                 out.add(s.substring(start, i));
+            } else if (c == '-' && isUnaryPosition(out) && startsNumber(s, skipSpace(s, i + 1))) {
+                // A sign belongs to the value: "-5" is as much a value as "5". A '-' after an
+                // operand is subtraction and stays.
+                i++;
             } else {
                 String two = i + 1 < n ? s.substring(i, i + 2) : "";
                 if (two.equals("//") || two.equals("..") || two.equals("::")
@@ -116,6 +120,27 @@ public final class SecureXPathParser {
             }
         }
         return out;
+    }
+
+    /** The tokens after which a '-' can only be a sign: an operator, or an opening bracket. */
+    private static final Set<String> BEFORE_UNARY = Set.of(
+            "(", "[", ",", "=", "!=", "<", "<=", ">", ">=", "+", "-", "|",
+            "and", "or", "div", "mod");
+
+    private static boolean isUnaryPosition(List<String> out) {
+        return out.isEmpty() || BEFORE_UNARY.contains(out.get(out.size() - 1));
+    }
+
+    private static int skipSpace(String s, int i) {
+        while (i < s.length() && Character.isWhitespace(s.charAt(i))) {
+            i++;
+        }
+        return i;
+    }
+
+    private static boolean startsNumber(String s, int i) {
+        return i < s.length() && (isDigit(s.charAt(i))
+                || (s.charAt(i) == '.' && i + 1 < s.length() && isDigit(s.charAt(i + 1))));
     }
 
     private static boolean isDigit(char c) {

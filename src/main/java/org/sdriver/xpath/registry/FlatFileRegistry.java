@@ -51,17 +51,19 @@ public class FlatFileRegistry implements Registry {
     }
 
     @Override
-    public void addID(String id) {
-        if (ids.add(id)) {
-            synchronized (this) {
-                try {
-                    Files.writeString(file, id + System.lineSeparator(), StandardCharsets.UTF_8,
-                            StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-                } catch (IOException e) {
-                    throw new UncheckedIOException("Could not write registry " + file, e);
-                }
-            }
+    public synchronized void addID(String id) {
+        if (ids.contains(id)) {
+            return;
         }
+        // Written first, recorded after: an identifier the file does not hold must not pass
+        // for trained in this run and then be missing from the next.
+        try {
+            Files.writeString(file, id + System.lineSeparator(), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not write registry " + file, e);
+        }
+        ids.add(id);
     }
 
     @Override
