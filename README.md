@@ -11,6 +11,9 @@ already seen. It is the prototype from
 and it carries over the idea of SDriver, Mitropoulos and Spinellis's JDBC driver that does the
 same for SQL, to XPath.
 
+The 2026 rebuild, and what it turned up, is written up in
+[SDriver/XPath, seventeen years on: the same overhead, and the bugs underneath](https://bkarak.wizhut.tech/blog/2026/04102026).
+
 ## How it works
 
 Each query gets an **identifier**. It is built from two things: the query with its string
